@@ -1,8 +1,10 @@
 package com.heshanthenura.platformergame.Components;
 
+import com.heshanthenura.platformergame.MainApplication;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -25,6 +27,8 @@ public class Enemy {
     AnimationTimer moveAnimation;
     List<Enemy> enemies;
 
+    final static Image texture = new Image(MainApplication.class.getResourceAsStream("assets/enemy.jpg"));
+
     public Enemy(AnchorPane root, Player player, VBox deadLbl, List<Enemy> enemies, Text healthLbl, Group group) {
         this.enemies=enemies;
         this.healthLbl = healthLbl;
@@ -33,7 +37,12 @@ public class Enemy {
         this.player = player;
         this.group=group;
 
-        enemy.setMaterial(new PhongMaterial(Color.ROYALBLUE));
+        PhongMaterial material = new PhongMaterial();
+        material.setDiffuseMap(texture);
+        material.setBumpMap(texture);
+        material.setSelfIlluminationMap(texture);
+
+        enemy.setMaterial(material);
         enemy.setTranslateY(-150);
         enemies.add(this);
         logger.info(String.valueOf(enemies.size()));

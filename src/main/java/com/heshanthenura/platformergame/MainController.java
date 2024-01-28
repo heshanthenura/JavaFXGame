@@ -4,6 +4,8 @@ import com.heshanthenura.platformergame.Components.Bullet;
 import com.heshanthenura.platformergame.Components.Enemy;
 import com.heshanthenura.platformergame.Components.GameStates;
 import com.heshanthenura.platformergame.Components.Player;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -11,6 +13,7 @@ import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.PointLight;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -18,8 +21,10 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
+import javafx.util.Duration;
 
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,24 +52,41 @@ public class MainController implements Initializable {
         Platform.runLater(() -> {
             player=new Player(root,mainGroup, GameStates.getEnemies());
             init();
-            spawnEnemies();
+            spawnEnemiesPeriodically();
         });
     }
 
-    public void spawnEnemies(){
-        for (int i = -300; i < 301; i+=300) {
-            Enemy enemy = new Enemy(root, player, deadLbl, GameStates.getEnemies(), healthLbl,mainGroup);
-            double zVal = (Math.random()*(1000)+2000);
-            enemy.getEnemy().setTranslateX(i);
-            enemy.getEnemy().setTranslateZ(zVal);
-            mainGroup.getChildren().add(enemy.getEnemy());
-        }
+    public void spawnEnemiesPeriodically() {
+        Timeline timeline = new Timeline();
+        KeyFrame keyFrame = new KeyFrame(
+                Duration.seconds(2), // Adjust the duration between enemy spawns
+                event -> spawnSingleEnemy()
+        );
+        timeline.getKeyFrames().add(keyFrame);
+        timeline.setCycleCount(Timeline.INDEFINITE); // Run the timeline indefinitely
+        timeline.play();
+    }
+
+    private void spawnSingleEnemy() {
+        Enemy enemy = new Enemy(root, player, deadLbl, GameStates.getEnemies(), healthLbl, mainGroup);
+
+        double[] possibleXValues = {-300, 0, 300};
+        double xVal = possibleXValues[(int) (Math.random() * possibleXValues.length)];
+
+        double zVal = Math.random() * 1000 + 2000; // Random z in the range [2000, 3000]
+
+        enemy.getEnemy().setTranslateX(xVal);
+        enemy.getEnemy().setTranslateZ(zVal);
+
+        mainGroup.getChildren().add(enemy.getEnemy());
     }
 
     public void init() {
         root.requestFocus();
         root.getScene().setCamera(new PerspectiveCamera());
-        root.getChildren().addAll(mainGroup, new PointLight());
+        PointLight light = new PointLight();
+//        light.setLightOn(false);
+        root.getChildren().addAll(mainGroup,light);
 
         mainGroup.getChildren().add(player.getPlayer());
         initFloor();
@@ -78,7 +100,6 @@ public class MainController implements Initializable {
 
     public void initFloor() {
         Box floor = new Box(1000, 100, 1000000);
-        floor.setMaterial(new PhongMaterial(Color.AQUA));
         Box leftWall = new Box(100, 50, 1000000);
         leftWall.setMaterial(new PhongMaterial(Color.RED));
         leftWall.setTranslateY(-50 - 25);

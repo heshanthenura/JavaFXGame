@@ -1,8 +1,10 @@
 package com.heshanthenura.platformergame.Components;
 
+import com.heshanthenura.platformergame.MainApplication;
 import javafx.animation.AnimationTimer;
 import javafx.animation.TranslateTransition;
 import javafx.scene.Group;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
@@ -24,20 +26,34 @@ public class Player {
 
     AnimationTimer moveAnimation;
 
+    final static Image texture = new Image(MainApplication.class.getResourceAsStream("assets/player.png"));
+
     public Player(AnchorPane root, Group group, List<Enemy> enemies) {
         this.root = root;
         this.group = group;
         this.enemies = enemies;
-        player.setMaterial(new PhongMaterial(Color.GREEN));
+
+        PhongMaterial material = new PhongMaterial();
+        material.setDiffuseMap(texture);
+        material.setSelfIlluminationMap(texture);
+
+        player.setMaterial(material);
         player.setTranslateY(-150);
         player.setTranslateZ(-900);
         changeTrack();
     }
 
     private void animateTrackChange(double targetX) {
+        // Stop the existing transition if it is still running
+        translateTransition.stop();
+
+        // Set the new target X position
         translateTransition.setToX(targetX);
+
+        // Play the new transition
         translateTransition.play();
     }
+
 
     void changeTrack() {
         root.setOnKeyPressed(e -> {
